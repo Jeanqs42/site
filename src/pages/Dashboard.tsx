@@ -30,7 +30,7 @@ const Dashboard = () => {
 
     setIsValidating(true);
     try {
-      const response = await fetch("http://18.230.116.139:8000/validate-key", {
+      const response = await fetch("https://aicentral.store/api/v1/validate-key", {
         method: "GET",
         headers: {
           "X-API-Key": apiKey,
@@ -75,7 +75,7 @@ const Dashboard = () => {
 
     setIsAsking(true);
     try {
-      const response = await fetch("http://18.230.116.139:8000/ask", {
+      const response = await fetch("https://aicentral.store/api/v1/ask", {
         method: "POST",
         headers: {
           "X-API-Key": apiKey,

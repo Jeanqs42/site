@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Docs = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -83,11 +85,20 @@ print(result)`;
                 Aprenda como integrar nossa API de IA orquestrada em seus projetos. Múltiplos serviços (Groq, Gemini, Cohere, Google Search) em uma única API.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="gradient-primary border-0 shadow-hero">
+                <Button 
+                  size="lg" 
+                  className="gradient-primary border-0 shadow-hero"
+                  onClick={() => navigate('/login')}
+                >
                   <Send className="w-4 h-4 mr-2" />
                   Começar agora
                 </Button>
-                <Button variant="outline" size="lg" className="border-border hover:bg-card-hover">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-border hover:bg-card-hover"
+                  onClick={() => document.getElementById('examples-section')?.scrollIntoView({ behavior: 'smooth' })}
+                >
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Ver exemplos
                 </Button>
@@ -312,7 +323,7 @@ print(result)`;
         </section>
 
         {/* Code Examples */}
-        <section className="py-16 gradient-hero">
+        <section id="examples-section" className="py-16 gradient-hero">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
@@ -450,6 +461,192 @@ print(result)`;
                         <p className="text-sm text-blue-800">
                           <strong>Dica:</strong> Use o mesmo session_id para manter o contexto da conversa.
                         </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Practical Examples */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+                🎯 Exemplos Práticos
+              </h2>
+              
+              <div className="space-y-8">
+                {/* Simple Question Example */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exemplo 1: Pergunta Simples</CardTitle>
+                    <CardDescription>
+                      Fazendo uma pergunta básica sem sessão
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Requisição:</h4>
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`POST https://aicentral.store/api/v1/ask
+Authorization: Bearer sk-abc123...
+Content-Type: application/json
+
+{
+  "question": "Qual a capital do Brasil?"
+}`}
+                        </pre>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Resposta:</h4>
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": "chat-789xyz",
+  "created": 1756417200,
+  "session_id": "auto-generated-123",
+  "provider": "groq_orchestrated",
+  "answer": "A capital do Brasil é Brasília, localizada no Distrito Federal."
+}`}
+                        </pre>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Conversation Example */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exemplo 2: Conversa com Contexto</CardTitle>
+                    <CardDescription>
+                      Mantendo contexto usando session_id
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* First message */}
+                      <div>
+                        <h4 className="font-semibold mb-2">Primeira pergunta:</h4>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "question": "Me fale sobre Python",
+  "session_id": "conversa-123"
+}`}
+                            </pre>
+                          </div>
+                          <div>
+                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": "chat-456",
+  "session_id": "conversa-123",
+  "answer": "Python é uma linguagem de programação..."
+}`}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Follow-up message */}
+                      <div>
+                        <h4 className="font-semibold mb-2">Pergunta de follow-up (mesmo session_id):</h4>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "question": "Quais são suas principais vantagens?",
+  "session_id": "conversa-123"
+}`}
+                            </pre>
+                          </div>
+                          <div>
+                            <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": "chat-789",
+  "session_id": "conversa-123",
+  "answer": "As principais vantagens do Python são: sintaxe simples, versatilidade..."
+}`}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Creative Example */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exemplo 3: Resposta Criativa</CardTitle>
+                    <CardDescription>
+                      Usando temperature alta para respostas mais criativas
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Requisição:</h4>
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "question": "Escreva um poema sobre IA",
+  "temperature": 1.5,
+  "session_id": "criativo-456"
+}`}
+                        </pre>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Resposta:</h4>
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`{
+  "id": "chat-creative-101",
+  "session_id": "criativo-456",
+  "provider": "groq_orchestrated",
+  "answer": "Inteligência que flui como rio,\\nBytes dançando em harmonia,\\nAlgoritmos tecem o futuro,\\nEm cada linha, poesia..."
+}`}
+                        </pre>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Error Example */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Exemplo 4: Tratamento de Erro</CardTitle>
+                    <CardDescription>
+                      Como a API responde quando há erro de autenticação
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold mb-2">Requisição (chave inválida):</h4>
+                        <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
+{`POST https://aicentral.store/api/v1/ask
+Authorization: Bearer sk-invalid-key
+Content-Type: application/json
+
+{
+  "question": "Teste"
+}`}
+                        </pre>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-2">Resposta de Erro (401):</h4>
+                        <pre className="bg-red-900 text-red-100 p-3 rounded text-xs overflow-x-auto">
+{`HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+
+{
+  "error": "Invalid API key",
+  "message": "The provided API key is invalid or expired",
+  "code": "auth_error"
+}`}
+                        </pre>
                       </div>
                     </div>
                   </CardContent>
