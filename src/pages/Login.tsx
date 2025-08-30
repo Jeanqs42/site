@@ -1,25 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Brain, Mail, Lock, User, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const { user, signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false);
-      // Here you would handle the actual authentication
-      // For now, we'll just show a message about Supabase integration
-    }, 2000);
+    const { error } = await signIn(email, password);
+    
+    if (!error) {
+      navigate('/dashboard');
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    await signUp(email, password, fullName);
+    
+    setIsLoading(false);
   };
 
   return (
@@ -53,7 +75,7 @@ const Login = () => {
               </TabsList>
               
               <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
@@ -63,6 +85,8 @@ const Login = () => {
                         type="email"
                         placeholder="seu@email.com"
                         className="pl-9"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -77,6 +101,8 @@ const Login = () => {
                         type="password"
                         placeholder="••••••••"
                         className="pl-9"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                       />
                     </div>
@@ -103,7 +129,7 @@ const Login = () => {
               </TabsContent>
               
               <TabsContent value="register" className="space-y-4">
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleRegister} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome completo</Label>
                     <div className="relative">
@@ -113,6 +139,8 @@ const Login = () => {
                         type="text"
                         placeholder="Seu nome"
                         className="pl-9"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
                         required
                       />
                     </div>
@@ -127,6 +155,8 @@ const Login = () => {
                         type="email"
                         placeholder="seu@email.com"
                         className="pl-9"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -141,6 +171,8 @@ const Login = () => {
                         type="password"
                         placeholder="••••••••"
                         className="pl-9"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                       />
                     </div>
@@ -171,20 +203,6 @@ const Login = () => {
           </CardContent>
         </Card>
 
-        {/* Supabase Integration Notice */}
-        <Card className="mt-6 border-yellow-200 bg-yellow-50">
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <h3 className="font-semibold text-yellow-800 mb-2">
-                🔧 Funcionalidade em desenvolvimento
-              </h3>
-              <p className="text-sm text-yellow-700">
-                Para implementar autenticação completa, conecte este projeto ao Supabase 
-                clicando no botão verde "Supabase" no topo direito da interface.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="text-center mt-6">
           <Link 
