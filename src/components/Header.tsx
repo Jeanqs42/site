@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { Brain } from "lucide-react";
+import { Brain, User, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
+  
+  const handleSignOut = async () => {
+    await signOut();
+  };
   
   return (
     <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
@@ -46,16 +52,38 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-4">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                Entrar
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button size="sm" className="gradient-primary border-0 shadow-hero hover:opacity-90">
-                Começar agora
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSignOut}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sair</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    Entrar
+                  </Button>
+                </Link>
+                <Link to="/login">
+                  <Button size="sm" className="gradient-primary border-0 shadow-hero hover:opacity-90">
+                    Começar agora
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
