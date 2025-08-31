@@ -6,13 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Key, Send, CheckCircle, AlertCircle, Activity, Zap, LogOut } from "lucide-react";
+import { Key, Send, CheckCircle, AlertCircle, Activity, Zap, LogOut, Copy, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth.tsx";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const [apiKey, setApiKey] = useState("");
+  const [userApiKey, setUserApiKey] = useState("");
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [question, setQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -28,9 +31,36 @@ const Dashboard = () => {
     }
   }, [user, loading, navigate]);
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data && !error) {
+          setUserProfile(data);
+          setUserApiKey(data.api_key || '');
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copiado!",
+      description: `${label} copiado para a área de transferência.`,
+    });
   };
 
   if (loading) {
@@ -163,8 +193,59 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* API Key Section */}
+          {/* User Profile Section */}
           <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <User className="w-5 h-5" />
+                  <span>Informações da Conta</span>
+                </CardTitle>
+                <CardDescription>
+                  Suas informações de perfil e API key para integração.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Nome Completo</Label>
+                    <div className="p-3 bg-muted rounded-lg border">
+                      <p className="text-sm font-medium">
+                        {userProfile?.full_name || 'Não informado'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <div className="p-3 bg-muted rounded-lg border">
+                      <p className="text-sm font-medium">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Sua API Key</Label>
+                  <div className="flex space-x-2">
+                    <div className="flex-1 p-3 bg-muted rounded-lg border font-mono text-sm">
+                      {userApiKey || 'Carregando...'}
+                    </div>
+                    <Button 
+                      onClick={() => copyToClipboard(userApiKey, 'API Key')} 
+                      disabled={!userApiKey}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Use esta API key para integrar com nossos serviços.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* API Key Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">

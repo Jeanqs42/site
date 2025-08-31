@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
-import { Brain, User, LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { Brain, User, LogOut, Sun, Moon } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth.tsx";
+import { useTheme } from "@/hooks/useTheme";
 
 const Header = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -14,7 +16,7 @@ const Header = () => {
   };
   
   return (
-    <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
@@ -52,6 +54,19 @@ const Header = () => {
           </nav>
           
           <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="flex items-center"
+            >
+              {theme === "light" ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </Button>
+            
             {user ? (
               <>
                 <Link to="/dashboard">

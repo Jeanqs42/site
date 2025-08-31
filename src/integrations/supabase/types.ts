@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          api_key: string | null
           avatar_url: string | null
           created_at: string
           full_name: string | null
@@ -24,6 +25,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          api_key?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
@@ -32,6 +34,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          api_key?: string | null
           avatar_url?: string | null
           created_at?: string
           full_name?: string | null
