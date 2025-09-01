@@ -47,20 +47,20 @@ serve(async (req) => {
 
     // Map plans to Stripe product IDs and prices
     const planConfig: Record<string, { productId: string; priceAmount: number; name: string }> = {
-      basico: { 
+      basic: { 
         productId: "prod_Sy88pA9yIGooWC", 
-        priceAmount: 1000, // R$ 10 in centavos
-        name: "Plano Básico" 
+        priceAmount: 1990, // R$ 19,90 in centavos
+        name: "Plano Basic" 
       },
-      pro: { 
+      premium: { 
         productId: "prod_Sy8J8PQlrEDIsV", 
-        priceAmount: 10000, // R$ 100 in centavos
-        name: "Plano Pro" 
+        priceAmount: 5990, // R$ 59,90 in centavos
+        name: "Plano Premium" 
       },
-      ilimitado: { 
+      unlimited: { 
         productId: "prod_Sy8PYSqgBRIirG", 
-        priceAmount: 50000, // R$ 500 in centavos
-        name: "Plano Ilimitado" 
+        priceAmount: 19990, // R$ 199,90 in centavos
+        name: "Plano Unlimited" 
       }
     };
 

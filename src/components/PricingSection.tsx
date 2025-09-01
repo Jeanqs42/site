@@ -176,13 +176,13 @@ const PricingSection = () => {
                   subscription?.subscription_tier === plan.name ? "secondary" :
                   plan.popular ? "default" : "outline"
                 }
-                onClick={user ? () => handleSubscribe(plan.name.toLowerCase()) : undefined}
-                disabled={loading === plan.name.toLowerCase() || subscription?.subscription_tier === plan.name}
+                onClick={user ? () => handleSubscribe(plan.name === "Basic" ? "basic" : plan.name === "Premium" ? "premium" : "unlimited") : undefined}
+                disabled={loading === (plan.name === "Basic" ? "basic" : plan.name === "Premium" ? "premium" : "unlimited") || subscription?.subscription_tier === plan.name}
                 asChild={!user}
               >
                 {user ? (
                   <>
-                    {loading === plan.name.toLowerCase() ? "Processando..." : 
+                    {loading === (plan.name === "Basic" ? "basic" : plan.name === "Premium" ? "premium" : "unlimited") ? "Processando..." : 
                      subscription?.subscription_tier === plan.name ? "Plano Atual" : 
                      plan.cta}
                   </>
