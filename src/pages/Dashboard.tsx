@@ -1,174 +1,88 @@
-import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Key, Send, CheckCircle, AlertCircle, Activity, Zap, LogOut, Copy, User } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth.tsx";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Copy, Crown, User, Key, Calendar, CheckCircle, LogOut, Activity, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const Dashboard = () => {
-  const [apiKey, setApiKey] = useState("");
-  const [userApiKey, setUserApiKey] = useState("");
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [question, setQuestion] = useState("");
-  const [response, setResponse] = useState("");
-  const [isValidating, setIsValidating] = useState(false);
-  const [isAsking, setIsAsking] = useState(false);
-  const [keyStatus, setKeyStatus] = useState<"valid" | "invalid" | null>(null);
-  const { toast } = useToast();
-  const { user, loading, signOut } = useAuth();
-  const navigate = useNavigate();
+export default function Dashboard() {
+  const { user, subscription, checkSubscription } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
+    if (user) {
+      fetchProfile();
+      checkSubscription(); // Refresh subscription status
     }
-  }, [user, loading, navigate]);
+  }, [user, checkSubscription]);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (data && !error) {
-          setUserProfile(data);
-          setUserApiKey(data.api_key || '');
-        }
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
       }
-    };
-
-    fetchUserProfile();
-  }, [user]);
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copiado!",
-      description: `${label} copiado para a área de transferência.`,
-    });
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copiado para a área de transferência!`);
+    } catch (err) {
+      toast.error('Erro ao copiar para a área de transferência');
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleManageSubscription = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
+
+      if (error) {
+        toast.error("Erro ao abrir portal de gerenciamento");
+        console.error(error);
+      } else if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast.error("Erro ao processar solicitação");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
 
   if (!user) {
     return null;
   }
-
-  const validateKey = async () => {
-    if (!apiKey.trim()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira uma API Key válida.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsValidating(true);
-    try {
-      const response = await fetch("https://aicentral.store/api/v1/validate-key", {
-        method: "GET",
-        headers: {
-          "X-API-Key": apiKey,
-        },
-      });
-      
-      if (response.ok) {
-        setKeyStatus("valid");
-        toast({
-          title: "Sucesso",
-          description: "API Key validada com sucesso!",
-        });
-      } else {
-        setKeyStatus("invalid");
-        toast({
-          title: "Erro",
-          description: "API Key inválida ou expirada.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      setKeyStatus("invalid");
-      toast({
-        title: "Erro",
-        description: "Erro ao validar API Key. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const askQuestion = async () => {
-    if (!apiKey.trim() || !question.trim()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira uma API Key e uma pergunta.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsAsking(true);
-    try {
-      const response = await fetch("https://aicentral.store/api/v1/ask", {
-        method: "POST",
-        headers: {
-          "X-API-Key": apiKey,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        setResponse(data.answer || "Resposta recebida com sucesso!");
-        toast({
-          title: "Sucesso",
-          description: "Pergunta processada com sucesso!",
-        });
-      } else {
-        toast({
-          title: "Erro",
-          description: data.error || "Erro ao processar pergunta.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao conectar com a API. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAsking(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -179,220 +93,184 @@ const Dashboard = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
             <p className="text-muted-foreground">
-              Bem-vindo, {user.email}! Gerencie sua API Key e teste nossa API de IA em tempo real.
+              Bem-vindo, {user.email}! Gerencie sua conta e acompanhe suas assinaturas.
             </p>
           </div>
-          <Button
-            variant="outline"
-            onClick={handleSignOut}
-            className="flex items-center space-x-2"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sair</span>
-          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* User Profile Section */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="w-5 h-5" />
-                  <span>Informações da Conta</span>
-                </CardTitle>
-                <CardDescription>
-                  Suas informações de perfil e API key para integração.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Nome Completo</Label>
-                    <div className="p-3 bg-muted rounded-lg border">
-                      <p className="text-sm font-medium">
-                        {userProfile?.full_name || 'Não informado'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <div className="p-3 bg-muted rounded-lg border">
-                      <p className="text-sm font-medium">{user?.email}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Sua API Key</Label>
-                  <div className="flex space-x-2">
-                    <div className="flex-1 p-3 bg-muted rounded-lg border font-mono text-sm">
-                      {userApiKey || 'Carregando...'}
-                    </div>
-                    <Button 
-                      onClick={() => copyToClipboard(userApiKey, 'API Key')} 
-                      disabled={!userApiKey}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Use esta API key para integrar com nossos serviços.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* API Key Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Key className="w-5 h-5" />
-                  <span>Configuração da API Key</span>
-                </CardTitle>
-                <CardDescription>
-                  Configure e valide sua API Key para começar a usar nossos serviços.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="apikey">API Key</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="apikey"
-                      type="password"
-                      placeholder="Insira sua API Key aqui..."
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={validateKey} 
-                      disabled={isValidating}
-                      className="gradient-primary border-0"
-                      size="sm"
-                    >
-                      {isValidating ? "Validando..." : "Validar"}
-                    </Button>
-                  </div>
-                  {keyStatus && (
-                    <div className={`flex items-center space-x-2 text-sm ${
-                      keyStatus === "valid" ? "text-green-600" : "text-red-600"
-                    }`}>
-                      {keyStatus === "valid" ? (
-                        <CheckCircle className="w-4 h-4" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4" />
-                      )}
-                      <span>
-                        {keyStatus === "valid" ? "API Key válida" : "API Key inválida"}
-                      </span>
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Subscription Status Card */}
+          <Card className="bg-card shadow-card hover:shadow-card-hover transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-foreground">Status da Assinatura</CardTitle>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  {subscription?.subscribed ? (
+                    <Badge variant="default" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Ativo
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">Inativo</Badge>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Playground Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Send className="w-5 h-5" />
-                  <span>Playground</span>
-                </CardTitle>
-                <CardDescription>
-                  Teste nossa API fazendo perguntas em tempo real.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="question">Sua pergunta</Label>
-                  <Textarea
-                    id="question"
-                    placeholder="Digite sua pergunta aqui... Por exemplo: 'Qual a capital da França?'"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-                
-                <Button 
-                  onClick={askQuestion} 
-                  disabled={isAsking || !apiKey}
-                  className="gradient-primary border-0 w-full"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  {isAsking ? "Processando..." : "Enviar pergunta"}
-                </Button>
-                
-                {response && (
-                  <div className="space-y-2">
-                    <Label>Resposta da IA</Label>
-                    <div className="p-4 bg-muted rounded-lg border">
-                      <p className="text-sm text-foreground whitespace-pre-wrap">
-                        {response}
-                      </p>
-                    </div>
-                  </div>
+                {subscription?.subscription_tier ? (
+                  <p className="text-2xl font-bold text-foreground">
+                    {subscription.subscription_tier}
+                  </p>
+                ) : (
+                  <p className="text-2xl font-bold text-foreground">Freemium</p>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+                {subscription?.subscription_end && (
+                  <p className="text-xs text-muted-foreground">
+                    Renova em: {formatDate(subscription.subscription_end)}
+                  </p>
+                )}
+                {subscription?.subscribed ? (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleManageSubscription}
+                    disabled={loading}
+                    className="w-full mt-2"
+                  >
+                    {loading ? "Carregando..." : "Gerenciar Assinatura"}
+                  </Button>
+                ) : (
+                  <Link to="/planos">
+                    <Button variant="default" size="sm" className="w-full mt-2">
+                      Ver Planos
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Stats Sidebar */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Activity className="w-5 h-5" />
-                  <span>Status da Conta</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {/* Profile Info Card */}
+          <Card className="bg-card shadow-card hover:shadow-card-hover transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-foreground">Informações do Perfil</CardTitle>
+              <User className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Nome</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {profile?.full_name || 'Não informado'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {user.email}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Membro desde</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {profile?.created_at ? formatDate(profile.created_at) : 'N/A'}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* API Key Card */}
+          <Card className="bg-card shadow-card hover:shadow-card-hover transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-foreground">API Key</CardTitle>
+              <Key className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <code className="flex-1 bg-muted px-2 py-1 rounded text-xs font-mono truncate">
+                    {profile?.api_key || 'Carregando...'}
+                  </code>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    onClick={() => copyToClipboard(profile?.api_key, 'API Key')}
+                    disabled={!profile?.api_key}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use esta chave para integrar com a API da Vexpro AI
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usage Stats Card */}
+          <Card className="bg-card shadow-card hover:shadow-card-hover transition-smooth">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-foreground">Uso da API</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Plano atual:</span>
-                  <Badge variant="secondary">Freemium</Badge>
+                  <span className="text-xs text-muted-foreground">Limite diário:</span>
+                  <span className="text-xs font-medium">
+                    {subscription?.subscription_tier === 'Basic' ? '1.000' :
+                     subscription?.subscription_tier === 'Premium' ? '10.000' :
+                     subscription?.subscription_tier === 'Ilimitado' ? '∞' : '100'} requisições
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Limite diário:</span>
-                  <span className="text-sm font-medium">100 requisições</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Uso atual:</span>
-                  <span className="text-sm font-medium">23/100</span>
+                  <span className="text-xs text-muted-foreground">Uso hoje:</span>
+                  <span className="text-xs font-medium">0 requisições</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
                   <div 
                     className="gradient-primary h-2 rounded-full transition-all duration-500"
-                    style={{ width: "23%" }}
+                    style={{ width: "0%" }}
                   ></div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Zap className="w-5 h-5" />
-                  <span>Upgrade</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Precisa de mais requisições? Faça upgrade para o plano Basic e obtenha 1.000 requisições/dia.
-                </p>
-                <Button variant="outline" className="w-full border-border hover:bg-card-hover">
-                  Ver planos
+          {/* Quick Actions Card */}
+          <Card className="bg-card shadow-card hover:shadow-card-hover transition-smooth md:col-span-2 lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-foreground">Ações Rápidas</CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Link to="/planos">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    Ver Planos
+                  </Button>
+                </Link>
+                <Link to="/docs">
+                  <Button variant="outline" size="sm" className="w-full justify-start">
+                    Documentação
+                  </Button>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  onClick={() => checkSubscription()}
+                >
+                  Atualizar Status
                 </Button>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
-};
-
-export default Dashboard;
+}

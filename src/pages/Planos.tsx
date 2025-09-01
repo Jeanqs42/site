@@ -2,6 +2,10 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Check, Crown, Zap, Infinity, Gift } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const plans = [
@@ -95,6 +99,39 @@ const plans = [
 ];
 
 const Planos = () => {
+  const { user, session, subscription } = useAuth();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (planName: string) => {
+    if (!user || !session) {
+      toast.error("Você precisa estar logado para assinar um plano");
+      return;
+    }
+
+    setLoading(planName);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { plan: planName },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      
+      if (error) {
+        toast.error("Erro ao criar sessão de pagamento");
+        console.error(error);
+      } else if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast.error("Erro ao processar pagamento");
+      console.error(error);
+    } finally {
+      setLoading(null);
+    }
+  };
   return (
     <div className="min-h-screen">
       <Header />
@@ -182,19 +219,31 @@ const Planos = () => {
                     </ul>
                   </div>
                   
-                  <Link to="/login" className="block">
-                    <Button 
-                      className={`w-full text-base py-3 ${
-                        plan.popular 
-                          ? 'gradient-primary border-0 shadow-hero' 
-                          : 'border-border hover:bg-card-hover'
-                      }`}
-                      variant={plan.popular ? "default" : "outline"}
-                      size="lg"
-                    >
-                      {plan.cta}
-                    </Button>
-                  </Link>
+                  <Button 
+                    className={`w-full text-base py-3 ${
+                      plan.popular 
+                        ? 'gradient-primary border-0 shadow-hero' 
+                        : 'border-border hover:bg-card-hover'
+                    }`}
+                    variant={
+                      subscription?.subscription_tier === plan.name ? "secondary" :
+                      plan.popular ? "default" : "outline"
+                    }
+                    onClick={user ? () => handleSubscribe(plan.name.toLowerCase()) : undefined}
+                    disabled={loading === plan.name.toLowerCase() || subscription?.subscription_tier === plan.name}
+                    size="lg"
+                    asChild={!user}
+                  >
+                    {user ? (
+                      <>
+                        {loading === plan.name.toLowerCase() ? "Processando..." : 
+                         subscription?.subscription_tier === plan.name ? "Plano Atual" : 
+                         plan.cta}
+                      </>
+                    ) : (
+                      <Link to="/login">{plan.cta}</Link>
+                    )}
+                  </Button>
                 </div>
               ))}
             </div>
