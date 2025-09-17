@@ -11,6 +11,11 @@ import Dashboard from "./pages/Dashboard";
 import Docs from "./pages/Docs";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+// Importe as novas páginas
+import Contato from "./pages/Contato";
+import Termos from "./pages/Termos";
+import Privacidade from "./pages/Privacidade";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +33,11 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/docs" element={<Docs />} />
               <Route path="/login" element={<Login />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              {/* Rotas adicionadas para corrigir o erro 404 */}
+              <Route path="/contato" element={<Contato />} />
+              <Route path="/termos" element={<Termos />} />
+              <Route path="/politica" element={<Privacidade />} />
+              {/* O catch-all deve ser a última rota */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

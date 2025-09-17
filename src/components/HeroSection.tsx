@@ -6,7 +6,7 @@ import heroImage from "@/assets/hero-image.jpg";
 const HeroSection = () => {
   return (
     <section className="relative gradient-hero overflow-hidden">
-      <div className="container mx-auto px-4 py-20 lg:py-32">
+      <div className="px-4 py-20 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="inline-flex items-center space-x-2 bg-primary-muted text-primary px-3 py-1 rounded-full text-sm font-medium">
@@ -16,7 +16,10 @@ const HeroSection = () => {
             
             <div className="space-y-6">
               <h1 className="text-4xl lg:text-6xl font-bold text-foreground leading-tight">
-                Transforme ideias em{" "}
+                <span className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                Agente Inteligente
+                </span>{" "}
+                 transforme ideias em{" "}
                 <span className="bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
                   respostas
                 </span>{" "}
@@ -65,7 +68,7 @@ const HeroSection = () => {
             <div className="relative rounded-2xl overflow-hidden shadow-hero">
               <img 
                 src={heroImage} 
-                alt="Vexpro AI Interface" 
+                alt="AI Central Interface" 
                 className="w-full h-auto object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent"></div>

@@ -23,17 +23,15 @@ const Docs = () => {
 -H "Content-Type: application/json" \\
 -H "Authorization: Bearer SEU_API_KEY" \\
 -d '{
-  "question": "Qual é a tecnologia de orquestração utilizada aqui?",
-  "session_id": "minha-sessao-123",
-  "temperature": 0.7
+  "question": "Como posso aprender a programar em Python?"
 }'`;
 
   const curlExampleXAPI = `curl -X POST https://aicentral.store/api/v1/ask \\
 -H "Content-Type: application/json" \\
--H "X-API-Key: SEU_API_KEY" \\
+-H "Authorization: Bearer SEU_API_KEY" \\
 -d '{
-  "question": "Qual é a tecnologia de orquestração utilizada aqui?",
-  "session_id": "minha-sessao-123"
+  "question": "Poderia me dar um exemplo prático?",
+  "session_id": "6a7f8e9d-c0b1-4a3d-9f2e-1b4c5d6e7f8g"
 }'`;
 
   const jsExample = `fetch("https://aicentral.store/api/v1/ask", {
@@ -43,9 +41,8 @@ const Docs = () => {
     "Content-Type": "application/json"
   },
   body: JSON.stringify({ 
-    question: "Qual é a tecnologia de orquestração utilizada aqui?",
-    session_id: "minha-sessao-123",
-    temperature: 0.7
+    question: "Como posso aprender a programar em Python?",
+    session_id: "6a7f8e9d-c0b1-4a3d-9f2e-1b4c5d6e7f8g"
   })
 })
 .then(response => response.json())
@@ -60,9 +57,8 @@ headers = {
     "Content-Type": "application/json"
 }
 data = {
-    "question": "Qual é a tecnologia de orquestração utilizada aqui?",
-    "session_id": "minha-sessao-123",
-    "temperature": 0.7
+    "question": "Como posso aprender a programar em Python?",
+    "session_id": "6a7f8e9d-c0b1-4a3d-9f2e-1b4c5d6e7f8g"
 }
 
 response = requests.post(url, headers=headers, json=data)
@@ -76,13 +72,13 @@ print(result)`;
       <main className="pt-8">
         {/* Hero Section */}
         <section className="gradient-hero py-16">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-                📚 Documentação da API VexPro AI Orchestrator
+                📚 Documentação da API AI Central
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Aprenda como integrar nossa API de IA orquestrada em seus projetos. Múltiplos serviços (Groq, Gemini, Cohere, Google Search) em uma única API.
+                Aprenda como integrar nossa API de IA orquestrada em seus projetos. Múltiplos serviços de IA em uma única API.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
@@ -109,7 +105,7 @@ print(result)`;
 
         {/* Base URL */}
         <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <Card>
                 <CardHeader>
@@ -123,7 +119,7 @@ print(result)`;
                 </CardHeader>
                 <CardContent>
                   <div className="bg-muted p-4 rounded-lg">
-                    <code className="text-lg font-mono">https://aicentral.store/api/v1</code>
+                    <code className="text-lg font-mono">https://aicentral.store/api</code>
                   </div>
                 </CardContent>
               </Card>
@@ -133,7 +129,7 @@ print(result)`;
 
         {/* Authentication */}
         <section className="py-16 gradient-hero">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 🔐 Autenticação
@@ -186,7 +182,7 @@ print(result)`;
 
         {/* API Endpoints */}
         <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 🔗 Endpoint Principal
@@ -204,7 +200,7 @@ print(result)`;
                     </code>
                   </div>
                   <CardDescription>
-                    Endpoint principal para interagir com a IA. Orquestra múltiplos serviços (Groq, Gemini, Cohere, Google Search) para fornecer a melhor resposta possível.
+                    Endpoint principal para interagir com a IA. Orquestra múltiplos serviços para fornecer a melhor resposta possível.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -228,16 +224,10 @@ print(result)`;
                               <td className="p-2">A pergunta do usuário</td>
                               <td className="p-2">✅ Sim</td>
                             </tr>
-                            <tr className="border-b">
+                            <tr>
                               <td className="p-2"><code>session_id</code></td>
                               <td className="p-2">string</td>
-                              <td className="p-2">ID da sessão para manter histórico da conversa</td>
-                              <td className="p-2">❌ Não</td>
-                            </tr>
-                            <tr>
-                              <td className="p-2"><code>temperature</code></td>
-                              <td className="p-2">number</td>
-                              <td className="p-2">Controla a criatividade (0-2)</td>
+                              <td className="p-2">ID único para a sessão da conversa. Se fornecido, a IA considerará o histórico da conversa anterior. Se omitido, uma nova sessão será iniciada.</td>
                               <td className="p-2">❌ Não</td>
                             </tr>
                           </tbody>
@@ -249,9 +239,8 @@ print(result)`;
                       <h4 className="font-semibold text-foreground mb-3">Exemplo de requisição:</h4>
                       <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
 {`{
-  "question": "Qual é a tecnologia de orquestração utilizada aqui?",
-  "session_id": "minha-sessao-123",
-  "temperature": 0.7
+  "question": "Como posso aprender a programar em Python?",
+  "session_id": "6a7f8e9d-c0b1-4a3d-9f2e-1b4c5d6e7f8g"
 }`}
                       </pre>
                     </div>
@@ -288,15 +277,10 @@ print(result)`;
                               <td className="p-2">string</td>
                               <td className="p-2">Indica que foi gerado pelo orquestrador</td>
                             </tr>
-                            <tr className="border-b">
+                            <tr>
                               <td className="p-2"><code>answer</code></td>
                               <td className="p-2">string</td>
-                              <td className="p-2">A resposta da IA para sua pergunta</td>
-                            </tr>
-                            <tr>
-                              <td className="p-2"><code>usage</code></td>
-                              <td className="p-2">object</td>
-                              <td className="p-2">Metadados de uso (opcional)</td>
+                              <td className="p-2">A resposta final, sintetizada e formatada, gerada pela IA</td>
                             </tr>
                           </tbody>
                         </table>
@@ -307,11 +291,11 @@ print(result)`;
                       <h4 className="font-semibold text-foreground mb-3">Exemplo de resposta:</h4>
                       <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
 {`{
-  "id": "chatcmpl-unique-id-123",
-  "created": 1756417200,
-  "session_id": "minha-sessao-123",
-  "provider": "groq_orchestrated",
-  "answer": "A tecnologia de orquestração utilizada é baseada no modelo Groq, que integra informações de outras fontes como Google Search, Gemini e Cohere para fornecer uma resposta mais completa."
+  "id": "chatcmpl-a1b2c3d4e5f6g7h8",
+  "created": 1678886400,
+  "session_id": "6a7f8e9d-c0b1-4a3d-9f2e-1b4c5d6e7f8g",
+  "provider": "aicentral_orchestrated",
+  "answer": "Para aprender a programar em Python, você pode começar com a sintaxe básica, variáveis, loops e funções. Existem muitos recursos online, como tutoriais e cursos, que podem te ajudar a dar os primeiros passos."
 }`}
                       </pre>
                     </div>
@@ -324,7 +308,7 @@ print(result)`;
 
         {/* Code Examples */}
         <section id="examples-section" className="py-16 gradient-hero">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 💻 Exemplos de Código
@@ -409,7 +393,7 @@ print(result)`;
 
         {/* Rate Limiting & Features */}
         <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 ⚡ Recursos Adicionais
@@ -472,7 +456,7 @@ print(result)`;
 
         {/* Practical Examples */}
         <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 🎯 Exemplos Práticos
@@ -508,7 +492,7 @@ Content-Type: application/json
   "id": "chat-789xyz",
   "created": 1756417200,
   "session_id": "auto-generated-123",
-  "provider": "groq_orchestrated",
+  "provider": "aicentral_orchestrated",
   "answer": "A capital do Brasil é Brasília, localizada no Distrito Federal."
 }`}
                         </pre>
@@ -581,9 +565,9 @@ Content-Type: application/json
                 {/* Creative Example */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Exemplo 3: Resposta Criativa</CardTitle>
+                    <CardTitle>Exemplo 3: Pergunta com Session ID</CardTitle>
                     <CardDescription>
-                      Usando temperature alta para respostas mais criativas
+                      Fazendo uma pergunta criativa usando session_id para manter contexto
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -593,7 +577,6 @@ Content-Type: application/json
                         <pre className="bg-gray-900 text-gray-100 p-3 rounded text-xs overflow-x-auto">
 {`{
   "question": "Escreva um poema sobre IA",
-  "temperature": 1.5,
   "session_id": "criativo-456"
 }`}
                         </pre>
@@ -604,7 +587,7 @@ Content-Type: application/json
 {`{
   "id": "chat-creative-101",
   "session_id": "criativo-456",
-  "provider": "groq_orchestrated",
+  "provider": "aicentral_orchestrated",
   "answer": "Inteligência que flui como rio,\\nBytes dançando em harmonia,\\nAlgoritmos tecem o futuro,\\nEm cada linha, poesia..."
 }`}
                         </pre>
@@ -658,7 +641,7 @@ Content-Type: application/json
 
         {/* Getting Started */}
         <section className="py-16 gradient-hero">
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
                 🚀 Como Começar
@@ -716,7 +699,7 @@ Content-Type: application/json
                       <div>
                         <h4 className="font-semibold text-foreground">Explore recursos avançados</h4>
                         <p className="text-sm text-muted-foreground">
-                          Use sessões para manter contexto, ajuste a temperatura para controlar criatividade e monitore seus limites de uso.
+                          Use sessões para manter contexto, monitore seus limites de uso e explore todas as funcionalidades da API.
                         </p>
                       </div>
                     </div>

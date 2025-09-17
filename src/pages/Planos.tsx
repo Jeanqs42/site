@@ -22,7 +22,7 @@ const plans = [
       "100 requisições/dia",
       "Modelos básicos de IA",
       "Documentação completa",
-      "Suporte via comunidade",
+      "Suporte",
       "Dashboard básico",
       "Rate limiting padrão"
     ],
@@ -32,7 +32,7 @@ const plans = [
   {
     name: "Basic",
     icon: Zap,
-    price: "R$ 19,90",
+    price: "R$ 59,90",
     period: "/mês",
     description: "Um plano acessível para desenvolvedores e pequenos negócios que precisam de um volume maior de interações diárias com a IA.",
     requests: "1.000 requisições por dia",
@@ -53,16 +53,15 @@ const plans = [
   {
     name: "Premium",
     icon: Crown,
-    price: "R$ 59,90",
+    price: "R$ 99,90",
     period: "/mês",
     description: "Nosso plano mais recomendado para empresas e aplicações em crescimento, com um volume robusto de requisições e acesso a uma gama completa de modelos.",
     requests: "10.000 requisições por dia",
-    models: "Acesso a todos os modelos de IA disponíveis (Groq, Gemini, Cohere, OpenAI)",
+    models: "Acesso a todos os modelos de IA disponíveis ",
     support: "E-mail e chat prioritários",
     features: [
       "10.000 requisições/dia",
       "Todos os modelos de IA",
-      "Groq, Gemini, Cohere, OpenAI",
       "Busca na web integrada",
       "Suporte prioritário",
       "Analytics avançado",
@@ -122,7 +121,6 @@ const Planos = () => {
         toast.error("Erro ao criar sessão de pagamento");
         console.error(error);
       } else if (data?.url) {
-        // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
       }
     } catch (error) {
@@ -132,16 +130,16 @@ const Planos = () => {
       setLoading(null);
     }
   };
+
   return (
     <div className="min-h-screen">
       <Header />
       
       <main className="pt-8">
-        {/* Hero Section */}
         <section className="gradient-hero py-16">
-          <div className="container mx-auto px-4 text-center">
+          <div className="mx-auto px-4 text-center">
             <h1 className="text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              🚀 Planos de API da Vexpro AI
+              🚀 Planos de API do Agente Inteligente
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Escolha o plano que melhor se adapta às suas necessidades. 
@@ -150,7 +148,6 @@ const Planos = () => {
           </div>
         </section>
 
-        {/* Pricing Cards */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
@@ -252,9 +249,11 @@ const Planos = () => {
               <p className="text-muted-foreground mb-4">
                 Precisa de algo personalizado? Entre em contato conosco.
               </p>
-              <Button variant="outline" size="lg" className="border-border hover:bg-card-hover">
-                Falar com especialista
-              </Button>
+              <Link to="/contato">
+                <Button variant="outline" size="lg" className="border-border hover:bg-card-hover">
+                  Falar com especialista
+                </Button>
+              </Link>
             </div>
           </div>
         </section>

@@ -17,7 +17,9 @@ interface AuthContextType {
   checkSubscription: () => Promise<void>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -140,6 +142,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { error };
   };
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+    
+    if (error) {
+      toast.error(`Erro no login com Google: ${error.message}`);
+    }
+    
+    return { error };
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -147,6 +164,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } else {
       toast.success("Logout realizado com sucesso.");
     }
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    
+    if (error) {
+      toast.error(`Erro ao enviar email: ${error.message}`);
+    } else {
+      toast.success("Email de recuperação enviado! Verifique sua caixa de entrada.");
+    }
+    
+    return { error };
   };
 
   const value = {
@@ -157,7 +188,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     checkSubscription,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
+    resetPassword,
   };
 
   return (

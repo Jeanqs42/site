@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
+// Adicione o novo tema à tipagem "Theme"
+type Theme = "dark" | "light" | "system" | "sepia";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -33,7 +34,8 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove("light", "dark");
+    // Adicione o novo tema aqui para garantir que ele seja removido corretamente
+    root.classList.remove("light", "dark", "sepia");
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")

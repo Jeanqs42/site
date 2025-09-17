@@ -17,13 +17,13 @@ const Header = () => {
   
   return (
     <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+      <div className="mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">Vexpro AI</span>
+            <span className="text-xl font-bold text-foreground">AI Central</span>
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
@@ -65,6 +65,17 @@ const Header = () => {
               ) : (
                 <Sun className="w-4 h-4" />
               )}
+            </Button>
+
+            {/* Novo botão para o tema Sépia */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setTheme("sepia")}
+              className="flex items-center"
+            >
+              {/* Você pode usar um ícone diferente ou um texto para o botão Sépia */}
+              <span>Sépia</span>
             </Button>
             
             {user ? (
